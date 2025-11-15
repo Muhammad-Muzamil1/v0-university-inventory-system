@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: autj-inventory-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password_change_me
+      MYSQL_DATABASE: university_inventory
+      MYSQL_USER: inventory_user
+      MYSQL_PASSWORD: inventory_password_change_me
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./scripts/database-schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+    networks:
+      - inventory-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # Node.js Application
+  app:
+    build: .
+    container_name: autj-inventory-api
+    environment:
+      NODE_ENV: production
+      DB_HOST: mysql
+      DB_USER: inventory_user
+      DB_PASSWORD: inventory_password_change_me
+      DB_NAME: university_inventory
+      PORT: 5000
+      JWT_SECRET: your-secret-key-change-in-production
+    ports:
+      - "5000:5000"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - inventory-network
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  inventory-network:
+    driver: bridge

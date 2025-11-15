@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Agriculture University Inventory Management System">
+    <meta name="theme-color" content="#2563eb">
+    <title>Agriculture University - Inventory Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <div id="app" class="app-container">
+        <!-- Loading Spinner -->
+        <div id="loading-spinner" class="loading-spinner">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+
+        <!-- Authentication Container -->
+        <div id="auth-container" class="auth-container">
+            <div class="auth-card">
+                <div class="text-center mb-4">
+                    <div class="logo-icon">
+                        <i class="fas fa-leaf"></i>
+                    </div>
+                    <h1 class="h3 fw-bold text-primary">AUTJ Inventory</h1>
+                    <p class="text-muted small">Agriculture University Tando Jam</p>
+                </div>
+
+                <form id="login-form" class="auth-form">
+                    <div class="mb-3">
+                        <label for="username" class="form-label fw-500">Username</label>
+                        <input type="text" class="form-control form-control-lg" id="username" placeholder="Enter username" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="password" class="form-label fw-500">Password</label>
+                        <input type="password" class="form-control form-control-lg" id="password" placeholder="Enter password" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg w-100 fw-600">
+                        <span class="btn-text">Sign In</span>
+                        <span class="spinner-border spinner-border-sm ms-2" style="display: none;"></span>
+                    </button>
+
+                    <div id="auth-message" class="alert mt-3" style="display: none;"></div>
+                </form>
+
+                <p class="text-center text-muted small mt-4">
+                    Demo: username: <strong>admin</strong>, password: <strong>admin123</strong>
+                </p>
+            </div>
+        </div>
+
+        <!-- Main Application Container -->
+        <div id="main-container" class="main-container" style="display: none;">
+            <!-- Top Navbar -->
+            <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom sticky-top">
+                <div class="container-fluid px-4">
+                    <a class="navbar-brand fw-bold text-primary" href="#dashboard">
+                        <i class="fas fa-leaf me-2"></i>AUTJ Inventory
+                    </a>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarNav">
+                        <ul class="navbar-nav ms-auto">
+                            <li class="nav-item">
+                                <a class="nav-link" href="#dashboard">Dashboard</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#inventory">Inventory</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#reports">Reports</a>
+                            </li>
+                            <li class="nav-item" id="admin-menu" style="display: none;">
+                                <a class="nav-link" href="#users">Users</a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-user-circle me-1"></i><span id="user-display"></span>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                    <li><a class="dropdown-item" href="#profile">Profile</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item text-danger" href="#" id="logout-btn">Logout</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Sidebar Navigation -->
+            <div class="app-sidebar">
+                <div class="sidebar-menu">
+                    <a href="#dashboard" class="sidebar-item active" data-page="dashboard">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="#inventory" class="sidebar-item" data-page="inventory">
+                        <i class="fas fa-boxes"></i>
+                        <span>Inventory</span>
+                    </a>
+                    <a href="#add-item" class="sidebar-item" data-page="add-item">
+                        <i class="fas fa-plus-circle"></i>
+                        <span>Add Item</span>
+                    </a>
+                    <a href="#reports" class="sidebar-item" data-page="reports">
+                        <i class="fas fa-file-chart-line"></i>
+                        <span>Reports</span>
+                    </a>
+                    <a href="#activity" class="sidebar-item" data-page="activity">
+                        <i class="fas fa-history"></i>
+                        <span>Activity Log</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Main Content Area -->
+            <main class="app-content">
+                <!-- Dashboard Page -->
+                <div id="dashboard-page" class="page-content active">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h1 class="h3 fw-bold">Dashboard</h1>
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-outline-primary btn-sm" id="refresh-dashboard">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Key Metrics -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6 col-lg-3">
+                            <div class="metric-card">
+                                <div class="metric-icon bg-primary">
+                                    <i class="fas fa-boxes"></i>
+                                </div>
+                                <div class="metric-info">
+                                    <p class="metric-label">Total Items</p>
+                                    <h3 class="metric-value" id="total-items">0</h3>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 col-lg-3">
+                            <div class="metric-card">
+                                <div class="metric-icon bg-success">
+                                    <i class="fas fa-dollar-sign"></i>
+                                </div>
+                                <div class="metric-info">
+                                    <p class="metric-label">Total Value</p>
+                                    <h3 class="metric-value" id="total-value">PKR 0</h3>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 col-lg-3">
+                            <div class="metric-card">
+                                <div class="metric-icon bg-warning">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </div>
+                                <div class="metric-info">
+                                    <p class="metric-label">Low Stock Items</p>
+                                    <h3 class="metric-value" id="low-stock-items">0</h3>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 col-lg-3">
+                            <div class="metric-card">
+                                <div class="metric-icon bg-info">
+                                    <i class="fas fa-tag"></i>
+                                </div>
+                                <div class="metric-info">
+                                    <p class="metric-label">Categories</p>
+                                    <h3 class="metric-value" id="total-categories">0</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Row -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-lg-6">
+                            <div class="card shadow-sm">
+                                <div class="card-body">
+                                    <h5 class="card-title fw-bold mb-3">Category Distribution</h5>
+                                    <canvas id="category-chart" height="80"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="card shadow-sm">
+                                <div class="card-body">
+                                    <h5 class="card-title fw-bold mb-3">Inventory Value Trend</h5>
+                                    <canvas id="value-chart" height="80"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Transactions -->
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title fw-bold mb-3">Recent Transactions</h5>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Item Name</th>
+                                            <th>Type</th>
+                                            <th>Quantity</th>
+                                            <th>Date & Time</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="recent-transactions-body">
+                                        <tr>
+                                            <td colspan="4" class="text-center text-muted py-4">Loading...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Inventory List Page -->
+                <div id="inventory-page" class="page-content">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h1 class="h3 fw-bold">Inventory Management</h1>
+                        <a href="#add-item" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Add New Item
+                        </a>
+                    </div>
+
+                    <!-- Search and Filters -->
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <input type="text" class="form-control" id="search-input" placeholder="Search items...">
+                                </div>
+                                <div class="col-md-4">
+                                    <select class="form-select" id="category-filter">
+                                        <option value="">All Categories</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <button class="btn btn-outline-secondary w-100" id="export-btn">
+                                        <i class="fas fa-download"></i> Export
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Inventory Table -->
+                    <div class="card shadow-sm">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Item Name</th>
+                                        <th>Category</th>
+                                        <th>Quantity</th>
+                                        <th>Unit Price</th>
+                                        <th>Total Value</th>
+                                        <th>Location</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="inventory-table-body">
+                                    <tr>
+                                        <td colspan="8" class="text-center text-muted py-4">Loading...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="card-footer">
+                            <nav aria-label="Inventory pagination">
+                                <ul class="pagination justify-content-center mb-0" id="inventory-pagination">
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add Item Page -->
+                <div id="add-item-page" class="page-content">
+                    <h1 class="h3 fw-bold mb-4">Add New Inventory Item</h1>
+
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <div class="card shadow-sm">
+                                <div class="card-body">
+                                    <form id="add-item-form">
+                                        <div class="mb-3">
+                                            <label for="item-name" class="form-label fw-500">Item Name *</label>
+                                            <input type="text" class="form-control" id="item-name" placeholder="Enter item name" required>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label for="item-category" class="form-label fw-500">Category *</label>
+                                                    <select class="form-select" id="item-category" required>
+                                                        <option value="">Select category</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label for="item-barcode" class="form-label fw-500">Barcode</label>
+                                                    <input type="text" class="form-control" id="item-barcode" placeholder="Enter barcode">
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="item-description" class="form-label fw-500">Description</label>
+                                            <textarea class="form-control" id="item-description" rows="3" placeholder="Enter item description"></textarea>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="mb-3">
+                                                    <label for="item-quantity" class="form-label fw-500">Quantity *</label>
+                                                    <input type="number" class="form-control" id="item-quantity" min="0" value="0" required>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="mb-3">
+                                                    <label for="item-price" class="form-label fw-500">Unit Price (PKR) *</label>
+                                                    <input type="number" class="form-control" id="item-price" step="0.01" min="0" required>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="mb-3">
+                                                    <label for="item-reorder" class="form-label fw-500">Reorder Level</label>
+                                                    <input type="number" class="form-control" id="item-reorder" min="0" value="10">
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="item-location" class="form-label fw-500">Storage Location</label>
+                                            <input type="text" class="form-control" id="item-location" placeholder="e.g., Building A, Room 101">
+                                        </div>
+
+                                        <div id="form-message" class="alert" style="display: none;"></div>
+
+                                        <div class="d-grid gap-2 d-md-flex justify-content-md-between">
+                                            <button type="reset" class="btn btn-outline-secondary">Clear</button>
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fas fa-save"></i> Save Item
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4">
+                            <div class="card shadow-sm bg-light">
+                                <div class="card-body">
+                                    <h5 class="card-title fw-bold mb-3">Quick Help</h5>
+                                    <ul class="list-unstyled">
+                                        <li class="mb-2">
+                                            <i class="fas fa-check-circle text-success me-2"></i>
+                                            <strong>Item Name:</strong> Unique name for the item
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-check-circle text-success me-2"></i>
+                                            <strong>Category:</strong> Select appropriate category
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-check-circle text-success me-2"></i>
+                                            <strong>Quantity:</strong> Initial stock quantity
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-check-circle text-success me-2"></i>
+                                            <strong>Unit Price:</strong> Price per unit in PKR
+                                        </li>
+                                        <li>
+                                            <i class="fas fa-check-circle text-success me-2"></i>
+                                            <strong>Reorder Level:</strong> Minimum stock alert threshold
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reports Page -->
+                <div id="reports-page" class="page-content">
+                    <h1 class="h3 fw-bold mb-4">Reports & Analytics</h1>
+
+                    <div class="row g-3">
+                        <div class="col-lg-6">
+                            <div class="card shadow-sm">
+                                <div class="card-body">
+                                    <h5 class="card-title fw-bold mb-3">
+                                        <i class="fas fa-pie-chart text-primary me-2"></i>Top Categories by Value
+                                    </h5>
+                                    <canvas id="top-categories-chart" height="100"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="card shadow-sm">
+                                <div class="card-body">
+                                    <h5 class="card-title fw-bold mb-3">
+                                        <i class="fas fa-bar-chart text-success me-2"></i>Category Count
+                                    </h5>
+                                    <canvas id="category-count-chart" height="100"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mt-2">
+                        <div class="col-12">
+                            <div class="card shadow-sm">
+                                <div class="card-header bg-white border-bottom">
+                                    <h5 class="card-title fw-bold mb-0">
+                                        <i class="fas fa-file-csv text-info me-2"></i>Export Data
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <p class="text-muted">Download comprehensive inventory report in CSV format.</p>
+                                    <button class="btn btn-info" id="export-csv-btn">
+                                        <i class="fas fa-download"></i> Download CSV Report
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Activity Log Page -->
+                <div id="activity-page" class="page-content">
+                    <h1 class="h3 fw-bold mb-4">Activity Log</h1>
+
+                    <div class="card shadow-sm">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>User</th>
+                                        <th>Action</th>
+                                        <th>Entity</th>
+                                        <th>Date & Time</th>
+                                        <th>Details</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="activity-log-body">
+                                    <tr>
+                                        <td colspan="5" class="text-center text-muted py-4">Loading...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="card-footer">
+                            <nav aria-label="Activity pagination">
+                                <ul class="pagination justify-content-center mb-0" id="activity-pagination">
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modal: Edit Item -->
+    <div class="modal fade" id="editItemModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Inventory Item</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="edit-item-form">
+                        <input type="hidden" id="edit-item-id">
+
+                        <div class="mb-3">
+                            <label for="edit-item-name" class="form-label fw-500">Item Name</label>
+                            <input type="text" class="form-control" id="edit-item-name" required>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="edit-item-category" class="form-label fw-500">Category</label>
+                                    <select class="form-select" id="edit-item-category" required></select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="edit-item-barcode" class="form-label fw-500">Barcode</label>
+                                    <input type="text" class="form-control" id="edit-item-barcode">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="edit-item-quantity" class="form-label fw-500">Quantity</label>
+                                    <input type="number" class="form-control" id="edit-item-quantity" min="0" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="edit-item-price" class="form-label fw-500">Unit Price (PKR)</label>
+                                    <input type="number" class="form-control" id="edit-item-price" step="0.01" min="0" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="edit-item-reorder" class="form-label fw-500">Reorder Level</label>
+                                    <input type="number" class="form-control" id="edit-item-reorder" min="0">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="edit-form-message" class="alert" style="display: none;"></div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="save-edit-btn">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="/script.js"></script>
+</body>
+</html>
