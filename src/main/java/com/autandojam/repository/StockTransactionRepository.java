@@ -9,6 +9,6 @@ import java.util.List;
 
 @Repository
 public interface StockTransactionRepository extends JpaRepository<StockTransaction, Integer> {
-    Page<StockTransaction> findByItemId(Integer itemId, Pageable pageable);
-    List<StockTransaction> findByItemIdOrderByCreatedAtDesc(Integer itemId);
+    Page<StockTransaction> findByItemItemId(Integer itemId, Pageable pageable); // fixed nested property
+    List<StockTransaction> findByItemItemIdOrderByCreatedAtDesc(Integer itemId); // fixed nested property
 }
