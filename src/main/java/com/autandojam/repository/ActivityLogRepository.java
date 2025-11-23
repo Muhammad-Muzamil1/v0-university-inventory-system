@@ -8,6 +8,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ActivityLogRepository extends JpaRepository<ActivityLog, Integer> {
-    Page<ActivityLog> findByUserId(Integer userId, Pageable pageable);
+    Page<ActivityLog> findByUserUserId(Integer userId, Pageable pageable); // fixed nested property
     Page<ActivityLog> findByAction(String action, Pageable pageable);
 }
