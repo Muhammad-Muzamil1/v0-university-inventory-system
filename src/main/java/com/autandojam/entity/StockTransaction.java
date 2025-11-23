@@ -48,7 +48,3 @@ public class StockTransaction {
         createdAt = LocalDateTime.now();
     }
 }
-
-enum TransactionType {
-    IN, OUT, ADJUSTMENT
-}

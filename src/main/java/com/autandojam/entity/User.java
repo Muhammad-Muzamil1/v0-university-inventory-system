@@ -56,7 +56,3 @@ public class User {
         updatedAt = LocalDateTime.now();
     }
 }
-
-enum UserRole {
-    ADMIN, STAFF, VIEWER
-}
